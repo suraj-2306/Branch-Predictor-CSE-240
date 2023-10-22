@@ -29,6 +29,10 @@ int ghistoryBits = 14;  // Number of bits used for Global History
 int bpType;             // Branch Prediction Type
 int verbose;
 
+// tournament specific declarations
+int localHistoryBits = 10;
+int globalHistoryBits = 12;
+
 //------------------------------------//
 //      Predictor Data Structures     //
 //------------------------------------//
@@ -38,7 +42,15 @@ int verbose;
 //
 // gshare
 uint8_t *bht_gshare;
-uint64_t ghistory;
+uint16_t ghistory;
+
+// tournament
+uint32_t *localHistTable;
+uint8_t *localPredictTable;
+uint8_t *globalHistTable;
+uint8_t *globalPredictTable;
+uint8_t *globalChoiceTable;
+uint16_t *globalHistory;
 
 //------------------------------------//
 //        Predictor Functions         //
@@ -46,6 +58,70 @@ uint64_t ghistory;
 
 // Initialize the predictor
 //
+
+// tournnament functions
+void init_tourn() {
+  int localHistTableEntries = 1 << localHistoryBits;
+  localHistTable = (uint32_t *)malloc(localHistTableEntries * sizeof(uint32_t));
+  localPredictTable =
+      (uint8_t *)malloc(localHistTableEntries * sizeof(uint8_t));
+
+  int globalHistTableEntries = 1 << globalHistoryBits;
+  globalHistTable = (uint8_t *)malloc(globalHistTableEntries * sizeof(uint8_t));
+  globalPredictTable =
+      (uint8_t *)malloc(globalHistTableEntries * sizeof(uint8_t));
+  globalPredictTable =
+      (uint8_t *)malloc(globalHistTableEntries * sizeof(uint8_t));
+
+  for (int i = 0; i < localHistTableEntries; i++) {
+    localHistTable[i] = CLEAR;
+    localPredictTable[i] = WN;
+  }
+
+  for (int i = 0; i < globalHistTableEntries; i++) {
+    globalPredictTable[i] = WN;
+    globalChoiceTable[i] = WN;
+  }
+  globalHistTable = CLEAR;
+}
+
+// tournament functions
+uint8_t tourn_predict(uint32_t PC) {
+  uint16_t pcLowerBits = PC & (localHistoryBits - 1);
+  uint16_t localPredictIndex = localHistTable[pcLowerBits];
+  uint8_t localPrediction = localPredictTable[localPredictIndex];
+  uint16_t globalPredictIndex = globalHistory & (globalHistoryBits - 1);
+  uint8_t globalPrediction = globalPredictTable[globalPredictIndex];
+  uint8_t globalChoicePrediction = globalPredictTable[globalPredictIndex];
+  uint8_t predictorChoice;
+
+  switch (globalChoicePrediction) {
+    case WG:
+      predictorChoice = globalPrediction;
+    case SG:
+      predictorChoice = globalPrediction;
+    case WL:
+      predictorChoice = localPrediction;
+    case SL:
+      predictorChoice = localPrediction;
+    default:
+      printf("Warning: Undefined state of entry in Choice Predict Table!\n");
+  }
+
+  switch (predictorChoice) {
+    case WN:
+      return NOTTAKEN;
+    case SN:
+      return NOTTAKEN;
+    case WT:
+      return TAKEN;
+    case ST:
+      return TAKEN;
+    default:
+      printf("Warning: Undefined state of entry in Local/Global Predictor!\n");
+      return NOTTAKEN;
+  }
+}
 
 // gshare functions
 void init_gshare() {
@@ -79,6 +155,9 @@ uint8_t gshare_predict(uint32_t pc) {
   }
 }
 
+void train_tourn(uint32_t pc, uint8_t outcome) {
+
+}
 void train_gshare(uint32_t pc, uint8_t outcome) {
   // get lower ghistoryBits of pc
   uint32_t bht_entries = 1 << ghistoryBits;
