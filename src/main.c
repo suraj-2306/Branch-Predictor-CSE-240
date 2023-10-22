@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "predictor.h"
 
 FILE *stream;
@@ -16,18 +17,18 @@ size_t len = 0;
 
 // Print out the Usage information to stderr
 //
-void usage()
-{
+void usage() {
   fprintf(stderr, "Usage: predictor <options> [<trace>]\n");
   fprintf(stderr, "       bunzip2 -kc trace.bz2 | predictor <options>\n");
   fprintf(stderr, " Options:\n");
   fprintf(stderr, " --help       Print this message\n");
   fprintf(stderr, " --verbose    Print predictions on stdout\n");
   fprintf(stderr, " --<type>     Branch prediction scheme:\n");
-  fprintf(stderr, "    static\n"
-                  "    gshare\n"
-                  "    tournament\n"
-                  "    custom\n");
+  fprintf(stderr,
+          "    static\n"
+          "    gshare\n"
+          "    tournament\n"
+          "    custom\n");
 }
 
 // Process an option and update the predictor
@@ -35,30 +36,18 @@ void usage()
 //
 // Returns True if Successful
 //
-int handle_option(char *arg)
-{
-  if (!strcmp(arg, "--static"))
-  {
+int handle_option(char *arg) {
+  if (!strcmp(arg, "--static")) {
     bpType = STATIC;
-  }
-  else if (!strncmp(arg, "--gshare", 8))
-  {
+  } else if (!strncmp(arg, "--gshare", 8)) {
     bpType = GSHARE;
-  }
-  else if (!strncmp(arg, "--tournament", 12))
-  {
+  } else if (!strncmp(arg, "--tournament", 12)) {
     bpType = TOURNAMENT;
-  }
-  else if (!strncmp(arg, "--custom", 8))
-  {
+  } else if (!strncmp(arg, "--custom", 8)) {
     bpType = CUSTOM;
-  }
-  else if (!strcmp(arg, "--verbose"))
-  {
+  } else if (!strcmp(arg, "--verbose")) {
     verbose = 1;
-  }
-  else
-  {
+  } else {
     return 0;
   }
 
@@ -70,44 +59,37 @@ int handle_option(char *arg)
 //
 // Returns True if Successful
 //
-int read_branch(uint32_t *pc, uint32_t *target, uint32_t *outcome, uint32_t *condition, uint32_t *call, uint32_t *ret, uint32_t *direct)
-{
-  if (getline(&buf, &len, stream) == -1)
-  {
+int read_branch(uint32_t *pc, uint32_t *target, uint32_t *outcome,
+                uint32_t *condition, uint32_t *call, uint32_t *ret,
+                uint32_t *direct) {
+  if (getline(&buf, &len, stream) == -1) {
     return 0;
   }
 
-  sscanf(buf, "0x%x\t0x%x\t%d\t%d\t%d\t%d\t%d\n", pc, target, outcome, condition, call, ret, direct);
+  sscanf(buf, "0x%x\t0x%x\t%d\t%d\t%d\t%d\t%d\n", pc, target, outcome,
+         condition, call, ret, direct);
 
   return 1;
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   // Set defaults
   stream = stdin;
   bpType = STATIC;
   verbose = 0;
 
   // Process cmdline Arguments
-  for (int i = 1; i < argc; ++i)
-  {
-    if (!strcmp(argv[i], "--help"))
-    {
+  for (int i = 1; i < argc; ++i) {
+    if (!strcmp(argv[i], "--help")) {
       usage();
       exit(0);
-    }
-    else if (!strncmp(argv[i], "--", 2))
-    {
-      if (!handle_option(argv[i]))
-      {
+    } else if (!strncmp(argv[i], "--", 2)) {
+      if (!handle_option(argv[i])) {
         printf("Unrecognized option %s\n", argv[i]);
         usage();
         exit(1);
       }
-    }
-    else
-    {
+    } else {
       // Use as input file
       stream = fopen(argv[i], "r");
     }
@@ -127,19 +109,16 @@ int main(int argc, char *argv[])
   uint32_t direct = 0;
 
   // Reach each branch from the trace
-  while (read_branch(&pc, &target, &outcome, &condition, &call, &ret, &direct))
-  {
-    if (condition == 1)
-    {
+  while (
+      read_branch(&pc, &target, &outcome, &condition, &call, &ret, &direct)) {
+    if (condition == 1) {
       num_branches++;
       // Make a prediction and compare with actual outcome
       uint32_t prediction = make_prediction(pc);
-      if (prediction != outcome)
-      {
+      if (prediction != outcome) {
         mispredictions++;
       }
-      if (verbose != 0)
-      {
+      if (verbose != 0) {
         printf("%d\n", prediction);
       }
 

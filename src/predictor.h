@@ -33,18 +33,18 @@ extern const char *email;
 extern const char *bpName[];
 
 // Definitions for 2-bit counters
-#define SN 0 // predict NT, strong not taken
-#define WN 1 // predict NT, weak not taken
-#define WT 2 // predict T, weak taken
-#define ST 3 // predict T, strong taken
+#define SN 0  // predict NT, strong not taken
+#define WN 1  // predict NT, weak not taken
+#define WT 2  // predict T, weak taken
+#define ST 3  // predict T, strong taken
 
 //------------------------------------//
 //      Predictor Configuration       //
 //------------------------------------//
-extern int ghistoryBits; // Number of bits used for Global History
-extern int lhistoryBits; // Number of bits used for Local History
-extern int pcIndexBits;  // Number of bits used for PC index
-extern int bpType;       // Branch Prediction Type
+extern int ghistoryBits;  // Number of bits used for Global History
+extern int lhistoryBits;  // Number of bits used for Local History
+extern int pcIndexBits;   // Number of bits used for PC index
+extern int bpType;        // Branch Prediction Type
 extern int verbose;
 
 //------------------------------------//
