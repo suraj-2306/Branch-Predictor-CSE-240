@@ -3,3 +3,4 @@ src/predictor
 src/predictor.o
 src_backup
 src_backup/*
+build/
