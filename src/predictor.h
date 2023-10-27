@@ -1,5 +1,3 @@
-//========================================================//
-//  predictor.h                                           //
 //  Header file for the Branch Predictor                  //
 //                                                        //
 //  Includes function prototypes and global predictor     //
@@ -9,7 +7,9 @@
 #ifndef PREDICTOR_H
 #define PREDICTOR_H
 
+#include <math.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 //
@@ -33,31 +33,34 @@ extern const char *email;
 extern const char *bpName[];
 
 // Definitions for 2-bit counters
-#define SN 0  // predict NT, strong not taken
-#define WN 1  // predict NT, weak not taken
-#define WT 2  // predict T, weak taken
-#define ST 3  // predict T, strong taken
+#define SN 0 // predict NT, strong not taken
+#define WN 1 // predict NT, weak not taken
+#define WT 2 // predict T, weak taken
+#define ST 3 // predict T, strong taken
 
 // Definitions for 2-bit counters
-#define SG 0  // strongly predict Global
-#define WG 1  // weakly predict Global
-#define WL 2  // weakly predict Local
-#define SL 3  // strongly predict Local
+#define SG 0 // strongly predict Global
+#define WG 1 // weakly predict Global
+#define WL 2 // weakly predict Local
+#define SL 3 // strongly predict Local
 #define CLEAR 0
 
 //------------------------------------//
 //      Predictor Configuration       //
 //------------------------------------//
-extern int ghistoryBits;  // Number of bits used for Global History
-extern int lhistoryBits;  // Number of bits used for Local History
-extern int pcIndexBits;   // Number of bits used for PC index
-extern int bpType;        // Branch Prediction Type
+extern int ghistoryBits; // Number of bits used for Global History
+extern int lhistoryBits; // Number of bits used for Local History
+extern int pcIndexBits;  // Number of bits used for PC index
+extern int bpType;       // Branch Prediction Type
 extern int verbose;
 
 //------------------------------------//
 //    Predictor Function Prototypes   //
 //------------------------------------//
 
+void init_tourn();
+uint8_t tourn_predict(uint32_t PC);
+void train_tourn(uint32_t PC, uint8_t outcome);
 // Initialize the predictor
 //
 void init_predictor();
