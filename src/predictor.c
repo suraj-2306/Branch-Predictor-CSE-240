@@ -1,4 +1,4 @@
-//========================================================//
+   59 uint8_t tourn_predict(uint32_t PC) { 
 //  predictor.c                                           //
 //  Source file for the Branch Predictor                  //
 //                                                        //
@@ -18,7 +18,7 @@ const char *studentName = "Suraj Sathya Prakash";
 const char *studentID = "";
 const char *email = "ssathyaprakash@ucsd.edu";
 
-//------------------------------------//
+//-------o-----------------------------//
 //      Predictor Configuration       //
 //------------------------------------//
 
@@ -31,7 +31,7 @@ int bpType;            // Branch Prediction Type
 int verbose;
 
 // tournament specific declarations
-int localHistoryBits = 12;
+int localHistoryBits = 10;
 int globalHistoryBits = 12;
 
 //------------------------------------//
