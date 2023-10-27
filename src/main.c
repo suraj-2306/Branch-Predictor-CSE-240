@@ -24,11 +24,10 @@ void usage() {
   fprintf(stderr, " --help       Print this message\n");
   fprintf(stderr, " --verbose    Print predictions on stdout\n");
   fprintf(stderr, " --<type>     Branch prediction scheme:\n");
-  fprintf(stderr,
-          "    static\n"
-          "    gshare\n"
-          "    tournament\n"
-          "    custom\n");
+  fprintf(stderr, "    static\n"
+                  "    gshare\n"
+                  "    tournament\n"
+                  "    custom\n");
 }
 
 // Process an option and update the predictor
@@ -73,6 +72,7 @@ int read_branch(uint32_t *pc, uint32_t *target, uint32_t *outcome,
 }
 
 int main(int argc, char *argv[]) {
+  freopen("./traceExp.txt", "r", stdin);
   // Set defaults
   stream = stdin;
   bpType = STATIC;
@@ -136,6 +136,7 @@ int main(int argc, char *argv[]) {
   // Cleanup
   fclose(stream);
   free(buf);
+  fclose(stdin);
 
   return 0;
 }
