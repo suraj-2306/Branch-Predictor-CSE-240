@@ -22,19 +22,18 @@ void init_tourn() {
   globalChoiceTable =
       (uint8_t *)malloc(globalHistTableEntries * sizeof(uint8_t));
 
-  for (int i = 0; i < localHistTableEntries; i++) {
+  for (int i = 0; i < 1 << localHistTableEntries; i++) {
     localHistTable[i] = 0;
     localPredictTable[i] = SN;
   }
 
-  for (int i = 0; i < globalHistTableEntries; i++) {
+  for (int i = 0; i < 1 << globalHistTableEntries; i++) {
     globalPredictTable[i] = SN;
-    globalChoiceTable[i] = SG;
+    globalChoiceTable[i] = WL;
   }
   globalHistTable = CLEAR;
 }
-
-
+int ninjaCountGlobal=0,ninjaCountLocal=0;
 uint8_t tourn_predict(uint32_t PC) {
   uint16_t globalHistTableEntries = 1 << globalHistoryBits;
   uint16_t localHistTableEntries = 1 << localHistoryBits;
@@ -42,15 +41,22 @@ uint8_t tourn_predict(uint32_t PC) {
   uint16_t pcLowerBits = PC & (localHistTableEntries - 1);
   uint16_t localPredictIndex = localHistTable[pcLowerBits];
   uint16_t localHistTableEntriesIndex =
-      localPredictIndex & ((1 << localHistoryBits) - 1);
+      localPredictIndex & (1 << (localHistoryBits - 1));
   uint8_t localPrediction = localPredictTable[localHistTableEntriesIndex];
 
   uint16_t globalPredictIndex = globalHistTable & (globalHistTableEntries - 1);
   uint8_t globalPrediction = globalPredictTable[globalPredictIndex];
   uint8_t globalChoicePrediction = globalChoiceTable[globalPredictIndex];
   uint8_t predictorChoice;
-
-  uint8_t predictorChoiceNinja = SG;
+  
+  // if(globalChoicePrediction!=0&globalChoicePrediction!=1)
+  // {
+  //   ninjaCountLocal+=1;
+  // }
+  // else {
+  // ninjaCountGlobal+=1;
+  // printf("%d local %d global\n",ninjaCountLocal,ninjaCountGlobal);
+  // }
   switch (globalChoicePrediction) {
   case WG:
     predictorChoice = globalPredictTable[globalPredictIndex];
@@ -223,7 +229,7 @@ void train_tourn(uint32_t PC, uint8_t outcome) {
   uint16_t pcLowerBits = PC & (localHistTableEntries - 1);
   uint16_t localHistEntry = localHistTable[pcLowerBits];
   uint16_t localHistTableEntriesIndex =
-      localHistEntry & ((1 << localHistoryBits) - 1);
+      localHistEntry & (1 << (localHistoryBits - 1));
   uint8_t localPrediction = localPredictTable[localHistTableEntriesIndex];
 
   uint32_t globalPredictIndex = globalHistTable & (globalHistTableEntries - 1);

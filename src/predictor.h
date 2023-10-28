@@ -1,4 +1,3 @@
-//  Header file for the Branch Predictor                  //
 //                                                        //
 //  Includes function prototypes and global predictor     //
 //  variables and defines                                 //
@@ -61,6 +60,11 @@ extern int verbose;
 void init_tourn();
 uint8_t tourn_predict(uint32_t PC);
 void train_tourn(uint32_t PC, uint8_t outcome);
+
+void init_percep();
+uint8_t percep_predict(uint32_t PC);
+void train_percep(uint32_t PC, uint8_t outcome);
+
 // Initialize the predictor
 //
 void init_predictor();
