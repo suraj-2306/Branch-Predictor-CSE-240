@@ -31,6 +31,7 @@ int verbose;
 //------------------------------------//
 //      Predictor Data Structures     //
 //------------------------------------//
+//
 
 //
 // TODO: Add your own Branch Predictor data structures here
