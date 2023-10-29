@@ -9,7 +9,7 @@
 // TODO:Student Information
 //
 const char *studentName = "Suraj Sathya Prakash";
-const char *studentID = "";
+const char *studentID = "A59026390";
 const char *email = "ssathyaprakash@ucsd.edu";
 
 //-------o-----------------------------//
@@ -31,6 +31,7 @@ int verbose;
 //------------------------------------//
 //      Predictor Data Structures     //
 //------------------------------------//
+//
 
 //
 // TODO: Add your own Branch Predictor data structures here
@@ -129,8 +130,7 @@ void init_predictor() {
 // Make a prediction for conditional branch instruction at PC 'pc'
 // Returning TAKEN indicates a prediction of taken; returning NOTTAKEN
 // indicates a prediction of not taken
-//
-uint8_t make_prediction(uint32_t pc) {
+uint32_t make_prediction(uint32_t pc, uint32_t target, uint32_t direct) {
   // Make a prediction based on the bpType
   switch (bpType) {
   case STATIC:
@@ -154,7 +154,10 @@ uint8_t make_prediction(uint32_t pc) {
 // indicates that the branch was not taken)
 //
 
-void train_predictor(uint32_t pc, uint8_t outcome) {
+void train_predictor(uint32_t pc, uint32_t target, uint32_t outcome,
+                     uint32_t condition, uint32_t call, uint32_t ret,
+                     uint32_t direct) {
+
   switch (bpType) {
   case STATIC:
   case GSHARE:
@@ -491,6 +494,6 @@ void train_percep(uint32_t PC, uint8_t outcome) {
   }
 
   globalBranchHistory = ((globalBranchHistory << 1) | outcome);
-  uint64_t branchMask = ((1 << branchHistoryWidth) - 1);
-  globalBranchHistory = globalBranchHistory & branchMask;
+  // uint64_t branchMask = ((1 << branchHistoryWidth) - 1);
+  // globalBranchHistory = globalBranchHistory & branchMask;
 }
