@@ -117,9 +117,10 @@ void init_predictor() {
     break;
   case TOURNAMENT:
     init_tourn();
-    // break;
+    break;
   case CUSTOM:
     init_percep();
+    break;
   default:
     break;
   }

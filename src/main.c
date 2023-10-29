@@ -1,4 +1,3 @@
-//  CSE 240a Branch Lab                                   //
 //                                                        //
 //  Students need to implement various Branch Predictors  //
 //========================================================//
@@ -71,7 +70,7 @@ int read_branch(uint32_t *pc, uint32_t *target, uint32_t *outcome,
 }
 
 int main(int argc, char *argv[]) {
-  // freopen("./traceExp.txt", "r", stdin);
+  freopen("./traceExp.txt", "r", stdin);
   // Set defaults
   stream = stdin;
   bpType = STATIC;

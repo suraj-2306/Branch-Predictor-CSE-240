@@ -6,49 +6,54 @@ uint32_t globalHistTable;
 uint8_t *globalPredictTable;
 uint8_t *globalChoiceTable;
 
-int localHistoryBits = 10;
+int localHistoryBits = 11;
 int globalHistoryBits = 12;
+int pcSelectBits = 10;
 
 void init_tourn() {
   int localHistTableEntries = 1 << localHistoryBits;
-  localHistTable = (uint16_t *)malloc(localHistTableEntries * sizeof(uint16_t));
+  localHistTable = (uint16_t *)malloc((1 << pcSelectBits) * sizeof(uint16_t));
   localPredictTable =
-      (uint8_t *)malloc(localHistTableEntries * sizeof(uint8_t));
+      (uint8_t *)malloc((1 << localHistoryBits) * sizeof(uint8_t));
 
   int globalHistTableEntries = 1 << globalHistoryBits;
 
   globalPredictTable =
-      (uint8_t *)malloc(globalHistTableEntries * sizeof(uint8_t));
+      (uint8_t *)malloc((1 << globalHistoryBits) * sizeof(uint8_t));
   globalChoiceTable =
-      (uint8_t *)malloc(globalHistTableEntries * sizeof(uint8_t));
+      (uint8_t *)malloc((1 << globalHistoryBits) * sizeof(uint8_t));
 
-  for (int i = 0; i < 1 << localHistTableEntries; i++) {
+  for (int i = 0; i < 1 << pcSelectBits; i++) {
     localHistTable[i] = 0;
+  }
+  for (int i = 0; i < 1 << localHistoryBits; i++) {
     localPredictTable[i] = SN;
   }
 
-  for (int i = 0; i < 1 << globalHistTableEntries; i++) {
+  for (int i = 0; i < 1 << globalHistoryBits; i++) {
     globalPredictTable[i] = SN;
     globalChoiceTable[i] = WL;
   }
   globalHistTable = CLEAR;
 }
-int ninjaCountGlobal=0,ninjaCountLocal=0;
+// int ninjaCountGlobal=0,ninjaCountLocal=0;
 uint8_t tourn_predict(uint32_t PC) {
-  uint16_t globalHistTableEntries = 1 << globalHistoryBits;
-  uint16_t localHistTableEntries = 1 << localHistoryBits;
+  // uint16_t globalHistTableEntries = 1 << globalHistoryBits;
+  // uint16_t localHistTableEntries = 1 << localHistoryBits;
 
-  uint16_t pcLowerBits = PC & (localHistTableEntries - 1);
+  uint16_t pcLowerBits = PC & ((1 << pcSelectBits) - 1);
   uint16_t localPredictIndex = localHistTable[pcLowerBits];
   uint16_t localHistTableEntriesIndex =
-      localPredictIndex & (1 << (localHistoryBits - 1));
+      localPredictIndex & ((1 << localHistoryBits) - 1);
+  //  printf("%d\n",(1 << localHistoryBits) - 1);
   uint8_t localPrediction = localPredictTable[localHistTableEntriesIndex];
 
-  uint16_t globalPredictIndex = globalHistTable & (globalHistTableEntries - 1);
+  uint16_t globalPredictIndex =
+      globalHistTable & ((1 << globalHistoryBits) - 1);
   uint8_t globalPrediction = globalPredictTable[globalPredictIndex];
   uint8_t globalChoicePrediction = globalChoiceTable[globalPredictIndex];
   uint8_t predictorChoice;
-  
+
   // if(globalChoicePrediction!=0&globalChoicePrediction!=1)
   // {
   //   ninjaCountLocal+=1;
@@ -102,7 +107,7 @@ uint8_t tourn_predict(uint32_t PC) {
   }
 }
 
-void train_tourn_local(uint32_t PC, uint8_t outcome, uint16_t localHistEntry,
+void train_tourn_local(uint8_t outcome, uint16_t localHistEntry,
                        uint8_t localPrediction) {
   switch (localPrediction) {
 
@@ -123,8 +128,8 @@ void train_tourn_local(uint32_t PC, uint8_t outcome, uint16_t localHistEntry,
     break;
   }
 }
-void train_tourn_global(uint32_t PC, uint8_t outcome,
-                        uint32_t globalPredictIndex, uint8_t globalPrediction) {
+void train_tourn_global(uint8_t outcome, uint32_t globalPredictIndex,
+                        uint8_t globalPrediction) {
   switch (globalPrediction) {
 
   case WN:
@@ -144,8 +149,7 @@ void train_tourn_global(uint32_t PC, uint8_t outcome,
     break;
   }
 }
-void train_tourn_global_choice(uint32_t PC, uint8_t outcome,
-                               uint16_t globalPrediction,
+void train_tourn_global_choice(uint8_t outcome, uint16_t globalPrediction,
                                uint16_t globalPredictIndex,
                                uint16_t localPrediction) {
 
@@ -176,9 +180,8 @@ void train_tourn_global_choice(uint32_t PC, uint8_t outcome,
 
   switch (predictionTuple) {
   case 0:
-
+    break;
   case 3:
-
     break;
   case 2:
     switch (globalChoicePrediction) {
@@ -223,23 +226,26 @@ void train_tourn_global_choice(uint32_t PC, uint8_t outcome,
 }
 
 void train_tourn(uint32_t PC, uint8_t outcome) {
-  uint16_t globalHistTableEntries = 1 << globalHistoryBits;
-  uint16_t localHistTableEntries = 1 << localHistoryBits;
+  // uint16_t globalHistTableEntries = 1 << globalHistoryBits;
+  // uint16_t localHistTableEntries = 1 << localHistoryBits;
 
-  uint16_t pcLowerBits = PC & (localHistTableEntries - 1);
+  uint16_t pcLowerBits = PC & ((1 << pcSelectBits) - 1);
   uint16_t localHistEntry = localHistTable[pcLowerBits];
   uint16_t localHistTableEntriesIndex =
-      localHistEntry & (1 << (localHistoryBits - 1));
+      localHistEntry & ((1 << localHistoryBits) - 1);
   uint8_t localPrediction = localPredictTable[localHistTableEntriesIndex];
 
-  uint32_t globalPredictIndex = globalHistTable & (globalHistTableEntries - 1);
+  uint32_t globalPredictIndex =
+      globalHistTable & ((1 << globalHistoryBits) - 1);
   uint8_t globalPrediction = globalPredictTable[globalPredictIndex];
 
-  train_tourn_local(PC, outcome, localHistEntry, localPrediction);
-  train_tourn_global(PC, outcome, globalPredictIndex, globalPrediction);
-  train_tourn_global_choice(PC, outcome, globalPrediction, globalPredictIndex,
+  train_tourn_global_choice(outcome, globalPrediction, globalPredictIndex,
                             localPrediction);
+  train_tourn_global(outcome, globalPredictIndex, globalPrediction);
+  train_tourn_local(outcome, localHistEntry, localPrediction);
 
-  globalHistTable = ((globalHistTable << 1) | outcome);
-  localHistTable[pcLowerBits] = ((localHistTable[pcLowerBits]) | outcome);
+  localHistTable[pcLowerBits] =
+      ((1 << localHistoryBits) - 1) & ((localHistEntry << 1) | outcome);
+  globalHistTable =
+      ((1 << globalHistoryBits) - 1) & ((globalHistTable << 1) | outcome);
 }
