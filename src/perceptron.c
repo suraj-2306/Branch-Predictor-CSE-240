@@ -8,7 +8,8 @@ int16_t y;
 int8_t historyRegister[branchHistoryWidth];
 int8_t percepTable[percepTableHistoryLength][branchHistoryWidth];
 int8_t perceptronPrediction;
-int theta = 134;
+int16_t percepSelected[branchHistoryWidth];
+int theta = 0;
 
 int8_t signNo(int16_t no) {
   if (no >= 0)
@@ -25,20 +26,18 @@ void init_percep() {
       percepTable[i][j] = (int8_t)0;
 
   globalBranchHistory = CLEAR;
+  for (i = 0; i < branchHistoryWidth; i++)
+    percepSelected[i] = CLEAR;
 }
 
 uint8_t percep_predict(uint32_t PC) {
-
-  int i;
-
-  int pcMaskBits = (1 << pcMask) - 1;
-  uint16_t pcMasked = PC & pcMaskBits;
-  uint16_t percepTableIndex = pcMasked;
-
-  int16_t percepSelected[branchHistoryWidth];
+  uint8_t i;
+  uint16_t pcMasked = PC & ((1 << pcMask) - 1);
+  uint16_t pcMaskedGBH =
+      (globalBranchHistory ^ pcMasked) & ((1 << pcMask) - 1);
 
   for (i = 0; i < branchHistoryWidth; i++) {
-    percepSelected[i] = percepTable[percepTableIndex][i];
+    percepSelected[i] = percepTable[pcMaskedGBH][i];
   }
 
   y = percepSelected[0];
@@ -48,21 +47,18 @@ uint8_t percep_predict(uint32_t PC) {
     else
       y -= percepSelected[i];
   }
-  perceptronPrediction = (y >= 0) ? 1 : 0;
+  perceptronPrediction = (y > 0) ? 1 : 0;
 
   return perceptronPrediction;
 }
 
 void train_percep(uint32_t PC, uint8_t outcome) {
   int i;
-  int pcMaskBits = (1 << pcMask) - 1;
-  uint16_t pcMasked = PC & pcMaskBits;
-  uint16_t percepTableIndex = (pcMasked);
-  int16_t percepSelected[branchHistoryWidth];
+  uint16_t pcMasked = PC & ((1 << pcMask) - 1);
+  uint16_t pcMaskedGBH =
+      (globalBranchHistory ^ pcMasked) & ((1 << pcMask) - 1);
+
   int8_t outcomeNormValue = (outcome == 1) ? 1 : -1;
-  for (i = 0; i < branchHistoryWidth; i++) {
-    percepSelected[i] = percepTable[percepTableIndex][i];
-  }
 
   if (perceptronPrediction != outcome || abs(y) <= theta) {
     for (i = 0; i < branchHistoryWidth; i++) {
@@ -74,7 +70,7 @@ void train_percep(uint32_t PC, uint8_t outcome) {
   }
 
   for (i = 0; i < branchHistoryWidth; i++) {
-    percepTable[percepTableIndex][i] = percepSelected[i];
+    percepTable[pcMaskedGBH][i] = percepSelected[i];
   }
 
   globalBranchHistory = ((globalBranchHistory << 1) | outcome);
