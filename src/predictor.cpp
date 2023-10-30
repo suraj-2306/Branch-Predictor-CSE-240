@@ -183,9 +183,9 @@ uint32_t globalHistTable;
 uint8_t *globalPredictTable;
 uint8_t *globalChoiceTable;
 
-int localHistoryBits = 11;
-int globalHistoryBits = 12;
-int pcSelectBits = 10;
+int localHistoryBits = 12;
+int globalHistoryBits = 14;
+int pcSelectBits = 12;
 
 void init_tourn() {
   int localHistTableEntries = 1 << localHistoryBits;
@@ -510,9 +510,9 @@ uint32_t globalHistTable2;
 uint8_t *globalPredictTable2;
 uint8_t *globalChoiceTable2;
 
-int localHistoryBits2 = 11;
-int globalHistoryBits2 = 12;
-int pcSelectBits2 = 10;
+int localHistoryBits2 = 12;
+int globalHistoryBits2 = 14;
+int pcSelectBits2 = 12;
 
 void init_tourn2() {
   int localHistTable2Entries = 1 << localHistoryBits2;
