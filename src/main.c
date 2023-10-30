@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
     {
       num_branches++;
       // Make a prediction and compare with actual outcome
-      uint32_t prediction = make_prediction(pc );
+      uint32_t prediction = make_prediction(pc, target, direct);
       if (prediction != outcome)
       {
         mispredictions++;
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
       }
     }
     // Train the predictor
-    train_predictor(pc, outcome);
+    train_predictor(pc, target, outcome, condition, call, ret, direct);
   }
 
   // Print out the mispredict statistics

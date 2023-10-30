@@ -54,22 +54,15 @@ void init_percep() {
       percepTable[i][j] = (int8_t)-1;
 
   globalBranchHistory = CLEAR;
-  // globalBranchHistory = globalBranchHistory | ((1<<branchHistoryWidth) - 1);
 }
 
 uint8_t percep_predict(uint32_t PC) {
 
   int i;
-  // uint16_t percepTableIndex = PC & ((1 << pcMask) - 1);
-  // int ninja = 0;
-  // if (percepTableIndex != 1)
-  //   ninja = 1;
 
   int pcMaskBits = (1 << pcMask) - 1;
   uint16_t pcMasked = PC & pcMaskBits;
-  uint16_t
-      // (((1<<branchHistoryWidth)-1)&globalBranchHistory);
-      percepTableIndex = (pcMasked ^ globalBranchHistory) & pcMaskBits;
+  uint16_t percepTableIndex = pcMasked;
 
   int16_t percepSelected[branchHistoryWidth];
 
@@ -86,6 +79,7 @@ uint8_t percep_predict(uint32_t PC) {
       y -= percepSelected[i];
   }
   perceptronPrediction = (y >= 0) ? 1 : 0;
+
   return perceptronPrediction;
 }
 
@@ -93,14 +87,12 @@ void train_percep(uint32_t PC, uint8_t outcome) {
   int i;
   int pcMaskBits = (1 << pcMask) - 1;
   uint16_t pcMasked = PC & pcMaskBits;
-  uint16_t
-      // (((1<<branchHistoryWidth)-1)&globalBranchHistory);
-      percepTableIndex = (pcMasked ^ globalBranchHistory) & pcMaskBits;
+  uint16_t percepTableIndex = (pcMasked);
   int16_t percepSelected[branchHistoryWidth];
-  int8_t outcomeNormValue = outcomeNorm(outcome);
-  int ninja2 = 0;
-  if (outcomeNormValue == -1)
-    ninja2 = 1;
+  int8_t outcomeNormValue = (outcome == 1) ? 1 : -1;
+  for (i = 0; i < branchHistoryWidth; i++) {
+    percepSelected[i] = percepTable[percepTableIndex][i];
+  }
 
   for (i = 0; i < branchHistoryWidth; i++) {
     percepSelected[i] = percepTable[percepTableIndex][i];

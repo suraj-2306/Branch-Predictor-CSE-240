@@ -5,7 +5,7 @@
 //  variables and defines                                 //
 //========================================================//
 
-#include <cstdio>
+// #include <cstdio>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,16 +67,17 @@ void init_predictor();
 // Make a prediction for conditional branch instruction at PC 'pc'
 // Returning TAKEN indicates a prediction of taken; returning NOTTAKEN
 // indicates a prediction of not taken
-//
-// uint32_t make_prediction(uint32_t pc, uint32_t target, uint32_t direct);
+
+uint32_t make_prediction(uint32_t pc, uint32_t target, uint32_t direct);
 
 // Train the predictor the last executed branch at PC 'pc' and with
 // outcome 'outcome' (true indicates that the branch was taken, false
 // indicates that the branch was not taken)
-//
-// void train_predictor(uint32_t pc, uint32_t target, uint32_t outcome,
-                     // uint32_t condition, uint32_t call, uint32_t ret,
-                     // uint32_t direct);
+
+void train_predictor(uint32_t pc, uint32_t target, uint32_t outcome,
+                     uint32_t condition, uint32_t call, uint32_t ret,
+                     uint32_t direct);
+
 
 void init_tourn();
 uint8_t tourn_predict(uint32_t PC);
@@ -85,6 +86,3 @@ void train_tourn(uint32_t PC, uint8_t outcome);
 void init_percep();
 uint8_t percep_predict(uint32_t PC);
 void train_percep(uint32_t PC, uint8_t outcome);
-
-void train_predictor(uint32_t pc, uint8_t outcome);
-uint8_t make_prediction(uint32_t pc);
