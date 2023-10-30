@@ -72,6 +72,4 @@ void train_percep(uint32_t PC, uint8_t outcome) {
   }
 
   globalBranchHistory = ((globalBranchHistory << 1) | outcome);
-  // uint64_t branchMask = ((1 << branchHistoryWidth) - 1);
-  // globalBranchHistory = globalBranchHistory & branchMask;
 }

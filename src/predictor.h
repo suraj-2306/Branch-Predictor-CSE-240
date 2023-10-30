@@ -79,6 +79,10 @@ void train_predictor(uint32_t pc, uint32_t target, uint32_t outcome,
                      uint32_t direct);
 
 
+void init_tourn2();
+uint8_t tourn_predict2(uint32_t PC);
+void train_tourn2(uint32_t PC, uint8_t outcome);
+
 void init_tourn();
 uint8_t tourn_predict(uint32_t PC);
 void train_tourn(uint32_t PC, uint8_t outcome);
