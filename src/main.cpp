@@ -1,17 +1,15 @@
-//========================================================//
 //  CSE 240a Branch Lab                                   //
 //                                                        //
 //  Students need to implement various Branch Predictors  //
 //========================================================//
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "predictor.h"
 
 FILE *stream;
 char *buf = NULL;
 size_t len = 0;
+
+
 
 // Print out the Usage information to stderr
 //
@@ -132,7 +130,7 @@ int main(int argc, char *argv[])
     {
       num_branches++;
       // Make a prediction and compare with actual outcome
-      uint32_t prediction = make_prediction(pc, target, direct);
+      uint32_t prediction = make_prediction(pc );
       if (prediction != outcome)
       {
         mispredictions++;
@@ -143,7 +141,7 @@ int main(int argc, char *argv[])
       }
     }
     // Train the predictor
-    train_predictor(pc, target, outcome, condition, call, ret, direct);
+    train_predictor(pc, outcome);
   }
 
   // Print out the mispredict statistics
