@@ -1,4 +1,3 @@
-   79 #ifndef PREDICTOR_H 
 //  Header file for the Branch Predictor                  //
 //                                                        //
 //  Includes function prototypes and global predictor     //
