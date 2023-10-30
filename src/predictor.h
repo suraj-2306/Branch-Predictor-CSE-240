@@ -1,4 +1,4 @@
-//  predictor.h                                           //
+   79 #ifndef PREDICTOR_H 
 //  Header file for the Branch Predictor                  //
 //                                                        //
 //  Includes function prototypes and global predictor     //
@@ -83,5 +83,9 @@ void train_tourn(uint32_t PC, uint8_t outcome);
 void init_percep();
 uint8_t percep_predict(uint32_t PC);
 void train_percep(uint32_t PC, uint8_t outcome);
+
+void init_tourn2();
+uint8_t tourn_predict2(uint32_t PC);
+void train_tourn2(uint32_t PC, uint8_t outcome);
 
 #endif
