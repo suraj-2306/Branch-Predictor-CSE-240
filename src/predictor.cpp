@@ -183,9 +183,9 @@ uint32_t globalHistTable;
 uint8_t *globalPredictTable;
 uint8_t *globalChoiceTable;
 
-int localHistoryBits = 10;
+int localHistoryBits = 11;
 int globalHistoryBits = 12;
-int pcSelectBits = 9;
+int pcSelectBits = 10;
 
 void init_tourn() {
   int localHistTableEntries = 1 << localHistoryBits;
