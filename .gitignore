@@ -5,3 +5,4 @@ src_backup
 src_backup/*
 build/
 .vscode
+traces
