@@ -9,6 +9,8 @@ uint8_t *globalChoiceTable2;
 int localHistoryBits2 = 12;
 int globalHistoryBits2 = 14;
 int pcSelectBits2 = 12;
+int pGHR = 7;
+int qBDH = 7;
 
 void init_tourn2() {
   int localHistTable2Entries = 1 << localHistoryBits2;
@@ -49,8 +51,13 @@ uint8_t tourn_predict2(uint32_t PC) {
   uint8_t localPrediction = localPredictTable2[localHistTable2EntriesIndex];
 
   uint16_t pcLowerBitsGlobal = PC & ((1 << globalHistoryBits2) - 1);
+  uint16_t gshareHash = ((globalHistTable2 << qBDH) & (1 << pGHR - 1)) |
+                        (localHistTable2EntriesIndex & (1 << qBDH - 1));
   uint32_t globalPredictIndex =
-      (pcLowerBitsGlobal ^ globalHistTable2) & ((1 << globalHistoryBits2) - 1);
+      (pcLowerBitsGlobal ^ gshareHash) & ((1 << globalHistoryBits2) - 1);
+  // uint32_t globalPredictIndex =
+  //     (pcLowerBitsGlobal ^ globalHistTable2) & ((1 << globalHistoryBits2) -
+  //     1);
   // uint16_t globalPredictIndex =
   //     globalHistTable2 & ((1 << globalHistoryBits2) - 1);
   //
@@ -239,8 +246,14 @@ void train_tourn2(uint32_t PC, uint8_t outcome) {
   uint8_t localPrediction = localPredictTable2[localHistTable2EntriesIndex];
 
   uint16_t pcLowerBitsGlobal = PC & ((1 << globalHistoryBits2) - 1);
+
+  uint16_t gshareHash = ((globalHistTable2 << qBDH) & (1 << pGHR - 1)) |
+                        (localHistTable2EntriesIndex & (1 << qBDH - 1));
   uint32_t globalPredictIndex =
-      (pcLowerBitsGlobal ^ globalHistTable2) & ((1 << globalHistoryBits2) - 1);
+      (pcLowerBitsGlobal ^ gshareHash) & ((1 << globalHistoryBits2) - 1);
+  // uint32_t globalPredictIndex =
+  //     (pcLowerBitsGlobal ^ globalHistTable2) & ((1 << globalHistoryBits2) -
+  //     1);
   uint32_t globalPredictChoiceIndex =
       globalHistTable2 & ((1 << globalHistoryBits2) - 1);
   // uint32_t globalPredictIndex =
