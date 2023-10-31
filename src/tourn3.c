@@ -1,20 +1,38 @@
 #include "predictor.h"
 
+#define branchHistoryWidth 31
+#define percepTableHistoryLength 2048
+#define pcMask 11
+
+uint64_t globalBranchHistory;
+int16_t y;
+int8_t historyRegister[branchHistoryWidth];
+int8_t percepTable[percepTableHistoryLength][branchHistoryWidth];
+int8_t perceptronPrediction;
+int16_t percepSelected[branchHistoryWidth];
+int theta = 0;
+
 uint16_t *localHistTable2;
 uint8_t *localPredictTable2;
 uint32_t globalHistTable2;
 uint8_t *globalPredictTable2;
 uint8_t *globalChoiceTable2;
 
-int localHistoryBits2 = 14;
+// int localHistoryBits2 = 11;
 int globalHistoryBits2 = 14;
-int pcSelectBits2 = 11;
+// int pcSelectBits2 = 10;
 
 void init_tourn2() {
-  int localHistTable2Entries = 1 << localHistoryBits2;
-  localHistTable2 = (uint16_t *)malloc((1 << pcSelectBits2) * sizeof(uint16_t));
-  localPredictTable2 =
-      (uint8_t *)malloc((1 << localHistoryBits2) * sizeof(uint8_t));
+
+  int i, j;
+
+  for (i = 0; i < 1 << pcMask; i++)
+    for (j = 0; j < branchHistoryWidth; j++)
+      percepTable[i][j] = (int8_t)0;
+
+  globalBranchHistory = CLEAR;
+  for (i = 0; i < branchHistoryWidth; i++)
+    percepSelected[i] = CLEAR;
 
   int globalHistTable2Entries = 1 << globalHistoryBits2;
 
@@ -23,37 +41,34 @@ void init_tourn2() {
   globalChoiceTable2 =
       (uint8_t *)malloc((1 << globalHistoryBits2) * sizeof(uint8_t));
 
-  for (int i = 0; i < 1 << pcSelectBits2; i++) {
-    localHistTable2[i] = 0;
-  }
-  for (int i = 0; i < 1 << localHistoryBits2; i++) {
-    localPredictTable2[i] = SN;
-  }
-
   for (int i = 0; i < 1 << globalHistoryBits2; i++) {
     globalPredictTable2[i] = SN;
     globalChoiceTable2[i] = WL;
   }
   globalHistTable2 = CLEAR;
 }
-// int ninjaCountGlobal=0,ninjaCountLocal=0;
 uint8_t tourn_predict2(uint32_t PC) {
-  // uint16_t globalHistTable2Entries = 1 << globalHistoryBits2;
-  // uint16_t localHistTable2Entries = 1 << localHistoryBits2;
 
-  uint16_t pcLowerBits = PC & ((1 << pcSelectBits2) - 1);
-  uint16_t localPredictIndex = localHistTable2[pcLowerBits];
-  uint16_t localHistTable2EntriesIndex =
-      localPredictIndex & ((1 << localHistoryBits2) - 1);
-  //  printf("%d\n",(1 << localHistoryBits2) - 1);
-  uint8_t localPrediction = localPredictTable2[localHistTable2EntriesIndex];
+  uint8_t i;
+  uint16_t pcMasked = PC & ((1 << pcMask) - 1);
+  uint16_t pcMaskedGBH = (globalBranchHistory ^ pcMasked) & ((1 << pcMask) - 1);
+
+  for (i = 0; i < branchHistoryWidth; i++) {
+    percepSelected[i] = percepTable[pcMaskedGBH][i];
+  }
+
+  y = percepSelected[0];
+  for (i = 1; i < branchHistoryWidth; i++) {
+    if ((globalBranchHistory >> i) & 1)
+      y += percepSelected[i];
+    else
+      y -= percepSelected[i];
+  }
+  perceptronPrediction = (y > 0) ? 1 : 0;
 
   uint16_t pcLowerBitsGlobal = PC & ((1 << globalHistoryBits2) - 1);
   uint32_t globalPredictIndex =
       (pcLowerBitsGlobal ^ globalHistTable2) & ((1 << globalHistoryBits2) - 1);
-  // uint16_t globalPredictIndex =
-  //     globalHistTable2 & ((1 << globalHistoryBits2) - 1);
-  //
   uint32_t globalPredictChoiceIndex =
       globalHistTable2 & ((1 << globalHistoryBits2) - 1);
   uint8_t globalPrediction = globalPredictTable2[globalPredictIndex];
@@ -61,29 +76,15 @@ uint8_t tourn_predict2(uint32_t PC) {
 
   uint8_t predictorChoice;
 
-  // if(globalChoicePrediction!=0&globalChoicePrediction!=1)
-  // {
-  //   ninjaCountLocal+=1;
-  // }
-  // else {
-  // ninjaCountGlobal+=1;
-  // printf("%d local %d global\n",ninjaCountLocal,ninjaCountGlobal);
-  // }
   switch (globalChoicePrediction) {
   case WG:
-    predictorChoice = globalPredictTable2[globalPredictIndex];
-
-    break;
   case SG:
     predictorChoice = globalPredictTable2[globalPredictIndex];
 
     break;
   case WL:
-    predictorChoice = localPredictTable2[localHistTable2EntriesIndex];
-
-    break;
   case SL:
-    predictorChoice = localPredictTable2[localHistTable2EntriesIndex];
+    predictorChoice = perceptronPrediction;
 
     break;
   default:
@@ -114,27 +115,27 @@ uint8_t tourn_predict2(uint32_t PC) {
   }
 }
 
-void train_tourn_local2(uint8_t outcome, uint16_t localHistEntry,
-                        uint8_t localPrediction) {
-  switch (localPrediction) {
+// void train_tourn_local2(uint8_t outcome, uint16_t localHistEntry,
+//                         uint8_t localPrediction) {
+//   switch (localPrediction) {
 
-  case WN:
-    localPredictTable2[localHistEntry] = (outcome == TAKEN) ? WT : SN;
-    break;
-  case SN:
-    localPredictTable2[localHistEntry] = (outcome == TAKEN) ? WN : SN;
-    break;
-  case WT:
-    localPredictTable2[localHistEntry] = (outcome == TAKEN) ? ST : WN;
-    break;
-  case ST:
-    localPredictTable2[localHistEntry] = (outcome == TAKEN) ? ST : WT;
-    break;
-  default:
-    printf("Warning: Undefined state of entry in Local Predict TABLE!\n");
-    break;
-  }
-}
+//   case WN:
+//     localPredictTable2[localHistEntry] = (outcome == TAKEN) ? WT : SN;
+//     break;
+//   case SN:
+//     localPredictTable2[localHistEntry] = (outcome == TAKEN) ? WN : SN;
+//     break;
+//   case WT:
+//     localPredictTable2[localHistEntry] = (outcome == TAKEN) ? ST : WN;
+//     break;
+//   case ST:
+//     localPredictTable2[localHistEntry] = (outcome == TAKEN) ? ST : WT;
+//     break;
+//   default:
+//     printf("Warning: Undefined state of entry in Local Predict TABLE!\n");
+//     break;
+//   }
+// }
 void train_tourn_global2(uint8_t outcome, uint32_t globalPredictIndex,
                          uint8_t globalPrediction) {
   switch (globalPrediction) {
@@ -232,26 +233,54 @@ void train_tourn_global_choice2(uint8_t outcome, uint16_t globalPrediction,
 }
 
 void train_tourn2(uint32_t PC, uint8_t outcome) {
-  uint16_t pcLowerBits = PC & ((1 << pcSelectBits2) - 1);
-  uint16_t localHistEntry = localHistTable2[pcLowerBits];
-  uint16_t localHistTable2EntriesIndex =
-      localHistEntry & ((1 << localHistoryBits2) - 1);
-  uint8_t localPrediction = localPredictTable2[localHistTable2EntriesIndex];
+  // uint16_t pcLowerBits = PC & ((1 << pcSelectBits2) - 1);
+  // uint16_t localHistEntry = localHistTable2[pcLowerBits];
+  // uint16_t localHistTable2EntriesIndex =
+  //     localHistEntry & ((1 << localHistoryBits2) - 1);
+  // uint8_t localPrediction =
+  // localPredictTable2[localHistTable2EntriesIndex];
 
   uint16_t pcLowerBitsGlobal = PC & ((1 << globalHistoryBits2) - 1);
   uint32_t globalPredictIndex =
-      (pcLowerBitsGlobal ^ globalHistTable2) & ((1 << globalHistoryBits2) - 1);
+      (globalHistTable2 ^ pcLowerBitsGlobal) & ((1 << globalHistoryBits2) - 1);
   uint32_t globalPredictChoiceIndex =
       globalHistTable2 & ((1 << globalHistoryBits2) - 1);
   uint8_t globalPrediction = globalPredictTable2[globalPredictIndex];
 
+  // train the choice predictor first
   train_tourn_global_choice2(outcome, globalPrediction,
-                             globalPredictChoiceIndex, localPrediction);
-  train_tourn_global2(outcome, globalPredictIndex, globalPrediction);
-  train_tourn_local2(outcome, localHistEntry, localPrediction);
+                             globalPredictChoiceIndex, perceptronPrediction);
 
-  localHistTable2[pcLowerBits] =
-      ((1 << localHistoryBits2) - 1) & ((localHistEntry << 1) | outcome);
+  // start perceptron
+  int i;
+  uint16_t pcMasked = PC & ((1 << pcMask) - 1);
+  uint16_t pcMaskedGBH = (globalBranchHistory ^ pcMasked) & ((1 << pcMask) - 1);
+  int8_t outcomeNormValue = (outcome == 1) ? 1 : -1;
+
+  if (perceptronPrediction != outcome || abs(y) <= theta) {
+    if (outcome)
+      percepSelected[0] += 1;
+    else
+      percepSelected[0] -= 1;
+
+    for (i = 1; i < branchHistoryWidth; i++) {
+      if (((globalBranchHistory >> i) & 1) == outcomeNormValue)
+        percepSelected[i] += 1;
+      else
+        percepSelected[i] -= 1;
+    }
+  }
+
+  for (i = 0; i < branchHistoryWidth; i++) {
+    percepTable[pcMaskedGBH][i] = percepSelected[i];
+  }
+
+  globalBranchHistory = ((globalBranchHistory << 1) | outcome);
+
+  train_tourn_global2(outcome, globalPredictIndex, globalPrediction);
+
+  // end perceptron
+
   globalHistTable2 =
       ((1 << globalHistoryBits2) - 1) & ((globalHistTable2 << 1) | outcome);
 }
