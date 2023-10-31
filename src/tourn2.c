@@ -6,9 +6,9 @@ uint32_t globalHistTable2;
 uint8_t *globalPredictTable2;
 uint8_t *globalChoiceTable2;
 
-int localHistoryBits2 = 14;
+int localHistoryBits2 = 12;
 int globalHistoryBits2 = 14;
-int pcSelectBits2 = 11;
+int pcSelectBits2 = 12;
 
 void init_tourn2() {
   int localHistTable2Entries = 1 << localHistoryBits2;
@@ -243,6 +243,8 @@ void train_tourn2(uint32_t PC, uint8_t outcome) {
       (pcLowerBitsGlobal ^ globalHistTable2) & ((1 << globalHistoryBits2) - 1);
   uint32_t globalPredictChoiceIndex =
       globalHistTable2 & ((1 << globalHistoryBits2) - 1);
+  // uint32_t globalPredictIndex =
+  // globalHistTable2 & ((1 << globalHistoryBits2) - 1);
   uint8_t globalPrediction = globalPredictTable2[globalPredictIndex];
 
   train_tourn_global_choice2(outcome, globalPrediction,
