@@ -390,7 +390,6 @@ void train_tourn_global_choice(uint8_t outcome, uint16_t globalPrediction,
 }
 
 void train_tourn(uint32_t PC, uint8_t outcome) {
-
   uint16_t pcLowerBits = PC & ((1 << pcSelectBits) - 1);
   uint16_t localHistEntry = localHistTable[pcLowerBits];
   uint16_t localHistTableEntriesIndex =
@@ -431,7 +430,7 @@ void init_percep() {
     for (j = 0; j < branchHistoryWidth; j++)
       percepTable[i][j] = (int8_t)1;
 
-  globalBranchHistory = CLEAR;
+  globalBranchHistory = 16383;
   for (i = 0; i < branchHistoryWidth; i++)
     percepSelected[i] = CLEAR;
 }
