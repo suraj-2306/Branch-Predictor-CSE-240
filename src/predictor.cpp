@@ -461,7 +461,8 @@ void train_tourn(uint32_t PC, uint8_t outcome) {
 // uint8_t percep_predict(uint32_t PC) {
 //   uint8_t i;
 //   uint16_t pcMasked = PC & ((1 << pcMask) - 1);
-//   uint16_t pcMaskedGBH = (globalBranchHistory ^ pcMasked) & ((1 << pcMask) - 1);
+//   uint16_t pcMaskedGBH = (globalBranchHistory ^ pcMasked) & ((1 << pcMask) -
+//   1);
 
 //   for (i = 0; i < branchHistoryWidth; i++) {
 //     percepSelected[i] = percepTable[pcMaskedGBH][i];
@@ -482,7 +483,8 @@ void train_tourn(uint32_t PC, uint8_t outcome) {
 // void train_percep(uint32_t PC, uint8_t outcome) {
 //   int i;
 //   uint16_t pcMasked = PC & ((1 << pcMask) - 1);
-//   uint16_t pcMaskedGBH = (globalBranchHistory ^ pcMasked) & ((1 << pcMask) - 1);
+//   uint16_t pcMaskedGBH = (globalBranchHistory ^ pcMasked) & ((1 << pcMask) -
+//   1);
 
 //   int8_t outcomeNormValue = (outcome == 1) ? 1 : -1;
 
@@ -555,7 +557,8 @@ void train_tourn(uint32_t PC, uint8_t outcome) {
 
 //   uint8_t i;
 //   uint16_t pcMasked = PC & ((1 << pcMask) - 1);
-//   uint16_t pcMaskedGBH = (globalBranchHistory ^ pcMasked) & ((1 << pcMask) - 1);
+//   uint16_t pcMaskedGBH = (globalBranchHistory ^ pcMasked) & ((1 << pcMask) -
+//   1);
 
 //   for (i = 0; i < branchHistoryWidth; i++) {
 //     percepSelected[i] = percepTable[pcMaskedGBH][i];
@@ -572,11 +575,13 @@ void train_tourn(uint32_t PC, uint8_t outcome) {
 
 //   uint16_t pcLowerBitsGlobal = PC & ((1 << globalHistoryBits2) - 1);
 //   uint32_t globalPredictIndex =
-//       (pcLowerBitsGlobal ^ globalHistTable2) & ((1 << globalHistoryBits2) - 1);
+//       (pcLowerBitsGlobal ^ globalHistTable2) & ((1 << globalHistoryBits2) -
+//       1);
 //   uint32_t globalPredictChoiceIndex =
 //       globalHistTable2 & ((1 << globalHistoryBits2) - 1);
 //   uint8_t globalPrediction = globalPredictTable2[globalPredictIndex];
-//   uint8_t globalChoicePrediction = globalChoiceTable2[globalPredictChoiceIndex];
+//   uint8_t globalChoicePrediction =
+//   globalChoiceTable2[globalPredictChoiceIndex];
 
 //   uint8_t predictorChoice;
 
@@ -746,7 +751,8 @@ void train_tourn(uint32_t PC, uint8_t outcome) {
 
 //   uint16_t pcLowerBitsGlobal = PC & ((1 << globalHistoryBits2) - 1);
 //   uint32_t globalPredictIndex =
-//       (globalHistTable2 ^ pcLowerBitsGlobal) & ((1 << globalHistoryBits2) - 1);
+//       (globalHistTable2 ^ pcLowerBitsGlobal) & ((1 << globalHistoryBits2) -
+//       1);
 //   uint32_t globalPredictChoiceIndex =
 //       globalHistTable2 & ((1 << globalHistoryBits2) - 1);
 //   uint8_t globalPrediction = globalPredictTable2[globalPredictIndex];
@@ -758,8 +764,8 @@ void train_tourn(uint32_t PC, uint8_t outcome) {
 //   // start perceptron
 //   int i;
 //   uint16_t pcMasked = PC & ((1 << pcMask) - 1);
-//   uint16_t pcMaskedGBH = (globalBranchHistory ^ pcMasked) & ((1 << pcMask) - 1);
-//   int8_t outcomeNormValue = (outcome == 1) ? 1 : -1;
+//   uint16_t pcMaskedGBH = (globalBranchHistory ^ pcMasked) & ((1 << pcMask) -
+//   1); int8_t outcomeNormValue = (outcome == 1) ? 1 : -1;
 
 //   if (perceptronPrediction != outcome || abs(y) <= theta) {
 //     for (i = 0; i < branchHistoryWidth; i++) {
@@ -1055,14 +1061,7 @@ int8_t historyRegister[branchHistoryWidth];
 int8_t percepTable[percepTableHistoryLength][branchHistoryWidth];
 int8_t perceptronPrediction;
 int16_t percepSelected[branchHistoryWidth];
-int theta =43;
-
-int8_t signNo(int16_t no) {
-  if (no >= 0)
-    return 1;
-  else
-    return -1;
-}
+int theta = 43;
 
 void init_percep() {
   int i, j;
@@ -1092,7 +1091,7 @@ uint8_t percep_predict(uint32_t PC) {
     else
       y -= percepSelected[i];
   }
-  perceptronPrediction = (y >= 0) ? 1 : 0;
+  perceptronPrediction = (y > 0) ? 1 : 0;
 
   return perceptronPrediction;
 }
@@ -1101,9 +1100,6 @@ void train_percep(uint32_t PC, uint8_t outcome) {
   int i;
   uint16_t pcMasked = PC & ((1 << pcMask) - 1);
   uint16_t pcMaskedGBH = (globalBranchHistory ^ pcMasked) & ((1 << pcMask) - 1);
-
-  int8_t outcomeNormValue = (outcome == 1) ? 1 : -1;
-
   // if (perceptronPrediction != outcome || abs(y) <= theta) {
   //   if (outcome)
   //     percepSelected[0] += 1;
@@ -1123,8 +1119,8 @@ void train_percep(uint32_t PC, uint8_t outcome) {
     else
       percepSelected[branchHistoryWidth - 1] -= 1;
 
-    for (i = 0; i < branchHistoryWidth-1; i++) {
-      if (((globalBranchHistory >> i) & 1)==outcome)
+    for (i = 0; i < branchHistoryWidth - 1; i++) {
+      if (((globalBranchHistory >> i) & 1) == outcome)
         percepSelected[i] += 1;
       else
         percepSelected[i] -= 1;
