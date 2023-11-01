@@ -1055,7 +1055,7 @@ int8_t historyRegister[branchHistoryWidth];
 int8_t percepTable[percepTableHistoryLength][branchHistoryWidth];
 int8_t perceptronPrediction;
 int16_t percepSelected[branchHistoryWidth];
-int theta = 43;
+int theta =43;
 
 int8_t signNo(int16_t no) {
   if (no >= 0)
@@ -1069,7 +1069,7 @@ void init_percep() {
 
   for (i = 0; i < 1 << pcMask; i++)
     for (j = 0; j < branchHistoryWidth; j++)
-      percepTable[i][j] = (int8_t)-1;
+      percepTable[i][j] = (int8_t)1;
 
   globalBranchHistory = CLEAR;
   for (i = 0; i < branchHistoryWidth; i++)
