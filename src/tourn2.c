@@ -51,13 +51,13 @@ uint8_t tourn_predict2(uint32_t PC) {
   uint8_t localPrediction = localPredictTable2[localHistTable2EntriesIndex];
 
   uint16_t pcLowerBitsGlobal = PC & ((1 << globalHistoryBits2) - 1);
-  uint16_t gshareHash = ((globalHistTable2 << qBDH) & (1 << pGHR - 1)) |
-                        (localHistTable2EntriesIndex & (1 << qBDH - 1));
-  uint32_t globalPredictIndex =
-      (pcLowerBitsGlobal ^ gshareHash) & ((1 << globalHistoryBits2) - 1);
+  uint16_t gshareHash = ((globalHistTable2 << qBDH) & ((1 << pGHR) - 1)) |
+                        (localHistTable2EntriesIndex & ((1 << qBDH) - 1));
   // uint32_t globalPredictIndex =
-  //     (pcLowerBitsGlobal ^ globalHistTable2) & ((1 << globalHistoryBits2) -
-  //     1);
+  //     (pcLowerBitsGlobal ^ gshareHash) & ((1 << globalHistoryBits2) - 1);
+  uint32_t globalPredictIndex =
+      (pcLowerBitsGlobal ^ globalHistTable2) & ((1 << globalHistoryBits2) -
+      1);
   // uint16_t globalPredictIndex =
   //     globalHistTable2 & ((1 << globalHistoryBits2) - 1);
   //
@@ -247,13 +247,13 @@ void train_tourn2(uint32_t PC, uint8_t outcome) {
 
   uint16_t pcLowerBitsGlobal = PC & ((1 << globalHistoryBits2) - 1);
 
-  uint16_t gshareHash = ((globalHistTable2 << qBDH) & (1 << pGHR - 1)) |
-                        (localHistTable2EntriesIndex & (1 << qBDH - 1));
-  uint32_t globalPredictIndex =
-      (pcLowerBitsGlobal ^ gshareHash) & ((1 << globalHistoryBits2) - 1);
+  uint16_t gshareHash = ((globalHistTable2 << qBDH) & ((1 << pGHR) - 1)) |
+                        (localHistTable2EntriesIndex & ((1 << qBDH) - 1));
   // uint32_t globalPredictIndex =
-  //     (pcLowerBitsGlobal ^ globalHistTable2) & ((1 << globalHistoryBits2) -
-  //     1);
+  //     (pcLowerBitsGlobal ^ gshareHash) & ((1 << globalHistoryBits2) - 1);
+  uint32_t globalPredictIndex =
+      (pcLowerBitsGlobal ^ globalHistTable2) & ((1 << globalHistoryBits2) -
+      1);
   uint32_t globalPredictChoiceIndex =
       globalHistTable2 & ((1 << globalHistoryBits2) - 1);
   // uint32_t globalPredictIndex =

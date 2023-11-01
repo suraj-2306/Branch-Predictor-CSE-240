@@ -10,7 +10,7 @@ int8_t historyRegister[branchHistoryWidth];
 int8_t percepTable[percepTableHistoryLength][branchHistoryWidth];
 int8_t perceptronPrediction;
 int16_t percepSelected[branchHistoryWidth];
-int theta = 0;
+int theta = 133;
 
 uint16_t *localHistTable2;
 uint8_t *localPredictTable2;

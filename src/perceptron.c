@@ -1,5 +1,5 @@
 #include "predictor.h"
-#define branchHistoryWidth 62
+#define branchHistoryWidth 63
 #define percepTableHistoryLength 2048
 #define pcMask 11
 
@@ -9,7 +9,7 @@ int8_t historyRegister[branchHistoryWidth];
 int8_t percepTable[percepTableHistoryLength][branchHistoryWidth];
 int8_t perceptronPrediction;
 int16_t percepSelected[branchHistoryWidth];
-int theta = 0;
+int theta = 33;
 
 int8_t signNo(int16_t no) {
   if (no >= 0)
@@ -39,14 +39,14 @@ uint8_t percep_predict(uint32_t PC) {
     percepSelected[i] = percepTable[pcMaskedGBH][i];
   }
 
-  y = percepSelected[0];
-  for (i = 1; i < branchHistoryWidth; i++) {
+  y = percepSelected[branchHistoryWidth - 1];
+  for (i = 0; i < branchHistoryWidth - 1; i++) {
     if ((globalBranchHistory >> i) & 1)
       y += percepSelected[i];
     else
       y -= percepSelected[i];
   }
-  perceptronPrediction = (y > 0) ? 1 : 0;
+  perceptronPrediction = (y >= 0) ? 1 : 0;
 
   return perceptronPrediction;
 }
@@ -58,14 +58,41 @@ void train_percep(uint32_t PC, uint8_t outcome) {
 
   int8_t outcomeNormValue = (outcome == 1) ? 1 : -1;
 
+  // if (perceptronPrediction != outcome || abs(y) <= theta) {
+  //   if (outcome)
+  //     percepSelected[0] += 1;
+  //   else
+  //     percepSelected[0] -= 1;
+
+  //   for (i = 1; i < branchHistoryWidth; i++) {
+  //     if (((globalBranchHistory >> i) & 1) == outcomeNormValue)
+  //       percepSelected[i] += 1;
+  //     else
+  //       percepSelected[i] -= 1;
+  //   }
+  // }
   if (perceptronPrediction != outcome || abs(y) <= theta) {
-    for (i = 0; i < branchHistoryWidth; i++) {
-      if (((globalBranchHistory >> i) & 1) == outcomeNormValue)
+    if (outcome)
+      percepSelected[branchHistoryWidth - 1] += 1;
+    else
+      percepSelected[branchHistoryWidth - 1] -= 1;
+
+    for (i = 0; i < branchHistoryWidth-1; i++) {
+      if (((globalBranchHistory >> i) & 1)==outcome)
         percepSelected[i] += 1;
       else
         percepSelected[i] -= 1;
     }
   }
+
+  // if (perceptronPrediction != outcome || abs(y) <= theta) {
+  //   for (i = 0; i < branchHistoryWidth; i++) {
+  //     if (((globalBranchHistory >> i) & 1) == outcomeNormValue)
+  //       percepSelected[i] += 1;
+  //     else
+  //       percepSelected[i] -= 1;
+  //   }
+  // }
 
   for (i = 0; i < branchHistoryWidth; i++) {
     percepTable[pcMaskedGBH][i] = percepSelected[i];
