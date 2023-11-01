@@ -23,7 +23,7 @@ void init_percep() {
 
   for (i = 0; i < 1 << pcMask; i++)
     for (j = 0; j < branchHistoryWidth; j++)
-      percepTable[i][j] = (int8_t)0;
+      percepTable[i][j] = (int8_t)-1;
 
   globalBranchHistory = CLEAR;
   for (i = 0; i < branchHistoryWidth; i++)

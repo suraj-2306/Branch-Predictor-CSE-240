@@ -10,7 +10,7 @@ int8_t historyRegister[branchHistoryWidth];
 int8_t percepTable[percepTableHistoryLength][branchHistoryWidth];
 int8_t perceptronPrediction;
 int16_t percepSelected[branchHistoryWidth];
-int theta = 133;
+int theta = 0;
 
 uint16_t *localHistTable2;
 uint8_t *localPredictTable2;
@@ -28,7 +28,7 @@ void init_tourn2() {
 
   for (i = 0; i < 1 << pcMask; i++)
     for (j = 0; j < branchHistoryWidth; j++)
-      percepTable[i][j] = (int8_t)0;
+      percepTable[i][j] = (int8_t)-1;
 
   globalBranchHistory = CLEAR;
   for (i = 0; i < branchHistoryWidth; i++)
@@ -64,7 +64,7 @@ uint8_t tourn_predict2(uint32_t PC) {
     else
       y -= percepSelected[i];
   }
-  perceptronPrediction = (y > 0) ? 1 : 0;
+  perceptronPrediction = (y >= 0) ? 1 : 0;
 
   uint16_t pcLowerBitsGlobal = PC & ((1 << globalHistoryBits2) - 1);
   uint32_t globalPredictIndex =
@@ -115,27 +115,6 @@ uint8_t tourn_predict2(uint32_t PC) {
   }
 }
 
-// void train_tourn_local2(uint8_t outcome, uint16_t localHistEntry,
-//                         uint8_t localPrediction) {
-//   switch (localPrediction) {
-
-//   case WN:
-//     localPredictTable2[localHistEntry] = (outcome == TAKEN) ? WT : SN;
-//     break;
-//   case SN:
-//     localPredictTable2[localHistEntry] = (outcome == TAKEN) ? WN : SN;
-//     break;
-//   case WT:
-//     localPredictTable2[localHistEntry] = (outcome == TAKEN) ? ST : WN;
-//     break;
-//   case ST:
-//     localPredictTable2[localHistEntry] = (outcome == TAKEN) ? ST : WT;
-//     break;
-//   default:
-//     printf("Warning: Undefined state of entry in Local Predict TABLE!\n");
-//     break;
-//   }
-// }
 void train_tourn_global2(uint8_t outcome, uint32_t globalPredictIndex,
                          uint8_t globalPrediction) {
   switch (globalPrediction) {
@@ -233,13 +212,7 @@ void train_tourn_global_choice2(uint8_t outcome, uint16_t globalPrediction,
 }
 
 void train_tourn2(uint32_t PC, uint8_t outcome) {
-  // uint16_t pcLowerBits = PC & ((1 << pcSelectBits2) - 1);
-  // uint16_t localHistEntry = localHistTable2[pcLowerBits];
-  // uint16_t localHistTable2EntriesIndex =
-  //     localHistEntry & ((1 << localHistoryBits2) - 1);
-  // uint8_t localPrediction =
-  // localPredictTable2[localHistTable2EntriesIndex];
-
+ 
   uint16_t pcLowerBitsGlobal = PC & ((1 << globalHistoryBits2) - 1);
   uint32_t globalPredictIndex =
       (globalHistTable2 ^ pcLowerBitsGlobal) & ((1 << globalHistoryBits2) - 1);
@@ -264,10 +237,10 @@ void train_tourn2(uint32_t PC, uint8_t outcome) {
       percepSelected[0] -= 1;
 
     for (i = 1; i < branchHistoryWidth; i++) {
-      if (((globalBranchHistory >> i) & 1) == outcomeNormValue)
+      if (((globalBranchHistory >> i) & 1) == outcome)
         percepSelected[i] += 1;
       else
-        percepSelected[i] -= 1;
+        percepSelected[i] -= 1; 
     }
   }
 
